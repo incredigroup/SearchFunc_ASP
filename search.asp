@@ -5,36 +5,36 @@
     Dim connection, recordset, sql, connectionString
     Dim datas
 
-    ' connectionString = Application("connectionString")
-    ' Set connection = Server.CreateObject("ADODB.Connection")
+    connectionString = Application("connectionString")
+    Set connection = Server.CreateObject("ADODB.Connection")
     
-    ' connection.ConnectionString = connectionString
-    ' connection.Open()
+    connection.ConnectionString = connectionString
+    connection.Open()
     
-    ' Dim data, seq
-    ' Set recordset = connection.Execute("select * from community where  title LIKE %" & keyword & "% and summary LIKE %" & keyword & "%")
-    ' seq = 0
-    ' Do While Not recordset.EOF
-    '   seq = seq+1
-    '   set data = New country
-    '   data.Title = recordset.Fields("title")
-    '   data.Code = recordset.Fields("summary")
-    '   datas.add seq, data
-    '   recordset.MoveNext
-    ' Loop 
-    ' connection.Close()
+    Dim data, seq
+    Set recordset = connection.Execute("select * from community where  title LIKE %" & keyword & "% and summary LIKE %" & keyword & "%")
+    seq = 0
+    Do While Not recordset.EOF
+      seq = seq+1
+      set data = New country
+      data.Title = recordset.Fields("title")
+      data.Code = recordset.Fields("summary")
+      datas.add seq, data
+      recordset.MoveNext
+    Loop 
+    connection.Close()
 
-    ' fileName = Application("rootURL") & "/files/countries.txt"
-    ' fileSpec = Server.MapPath(fileName)
+    fileName = Application("rootURL") & "/files/countries.txt"
+    fileSpec = Server.MapPath(fileName)
     
-    ' Set fso = CreateObject("Scripting.FileSystemObject")
-    ' Set file = fso.OpenTextFile(filespec,1) 
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set file = fso.OpenTextFile(filespec,1) 
 
-    ' Response.write "Reading file " & fileName & "<br/><br/>"
-    ' Do While Not file.AtEndOfStream
-    '   countrySplit = Split(file.ReadLine, ",")
-    '   Response.write countrySplit(0) &": "& countrySplit(1) &"<br/>"
-    ' Loop
+    Response.write "Reading file " & fileName & "<br/><br/>"
+    Do While Not file.AtEndOfStream
+      countrySplit = Split(file.ReadLine, ",")
+      Response.write countrySplit(0) &": "& countrySplit(1) &"<br/>"
+    Loop
   %>
 
 <!--#include file="layouts/header.asp"-->
