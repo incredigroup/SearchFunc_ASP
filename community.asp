@@ -1,6 +1,6 @@
 <!--#include file="layouts/header.asp"-->
 
-  <h1>Write File</h1>
+  <h1>Community Page</h1>
 
   <%
     Dim fso, file, fileSpec, fileName

@@ -4,7 +4,10 @@
 Sub Application_OnStart
   Application("visitors") = 0
   Application("rootURL") = "/SearchFunc_ASP"
-  Application("connectionString") = "Provider=SQLOLEDB.1;Data Source=USSER-PC\SQLEXPRESS;Database=classicasp;User Id=root;Password="
+  ' Application("connectionString") = "Provider=SQLOLEDB.1;Data Source=(local);Database=classicasp;User Id=root;Password="
+  ' Application("connectionString") = "Provider=SQLOLEDB.1;Data Source=snokaron\SQLEXPRESS;Database=classicasp;User Id=root;Password="
+  Application("connectionString") = "Provider=SQLOLEDB.1;Data Source=(local));Database=classicasp;User Id=root;Password="
+  ' Application("connectionString") = "Data Source=;Network Library=DBMSSOCN;Initial Catalog=classicasp;User ID=root;Password=;"
 End Sub
 
 Sub Session_OnStart
