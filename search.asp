@@ -1,40 +1,62 @@
-
+<!--#include file="./models/search.asp" -->
   <%
     Dim keyword
     keyword = Request.QueryString("keyword")
+
+    Dim ignoreFile, ignoreFolder, table
     Dim connection, recordset, sql, connectionString
-    Dim datas
+    Dim datas, seq
+    Set datas = Server.CreateObject("Scripting.Dictionary")
+    ignoreFile = "header.asp, footer,asp, search.asp, global.asa, connection.udl"
+    ignoreFolder = "/css, /docs/pdf, /images, /files"
+    table = "community"
 
     connectionString = Application("connectionString")
     Set connection = Server.CreateObject("ADODB.Connection")
-    
     connection.ConnectionString = connectionString
     connection.Open()
     
-    Dim data, seq
-    Set recordset = connection.Execute("select * from community where  title LIKE %" & keyword & "% and summary LIKE %" & keyword & "%")
+    Set recordset = connection.Execute("select * from community where description like '%" & keyword &"%'")
     seq = 0
     Do While Not recordset.EOF
       seq = seq+1
-      set data = New country
+      set data = New search
+      data.Link = "community.asp"
       data.Title = recordset.Fields("title")
-      data.Code = recordset.Fields("summary")
+      data.Summary = recordset.Fields("summary")
+      data.Description = recordset.Fields("description")
       datas.add seq, data
       recordset.MoveNext
     Loop 
     connection.Close()
 
-    fileName = Application("rootURL") & "/files/countries.txt"
-    fileSpec = Server.MapPath(fileName)
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    Set file = fso.OpenTextFile(filespec,1) 
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+    folderURL = Application("rootURL")
 
-    Response.write "Reading file " & fileName & "<br/><br/>"
-    Do While Not file.AtEndOfStream
-      countrySplit = Split(file.ReadLine, ",")
-      Response.write countrySplit(0) &": "& countrySplit(1) &"<br/>"
-    Loop
+    folderSpec = Server.MapPath(folderURL&"/")
+    Set fso2 = CreateObject("Scripting.FileSystemObject")
+    Set objFolder = fso2.getFolder(folderSpec)
+
+    Response.write objFolder.Path
+    Set colFiles = objFolder.Files
+    For Each objFile in colFiles
+        Response.write objFile.Name   & "<br/>"
+    Next
+
+    ShowSubfolders objFolder
+
+    Sub ShowSubFolders(Folder)
+        For Each Subfolder in Folder.SubFolders
+            Response.write Subfolder.Path
+            Set objFolder = objFSO.getFolder(Subfolder.Path)
+            Set colFiles = objFolder.Files
+            For Each objFile in colFiles
+                Response.write objFile.Name & "<br/>"
+            Next
+            ShowSubFolders Subfolder
+        Next
+    End Sub
+    
   %>
 
 <!--#include file="layouts/header.asp"-->
@@ -42,6 +64,19 @@
   <div class="search-count">Your search for < <%= keyword %> > matched 100 records</div>
   <br/>
       <div class="container">
+        <% For Each item in datas %> 
+          <div class="search-one">
+            <label class="search-title">
+              <div class="search-url">http://localhost/search/<%= datas(item).Link%></div>
+              <a href="<%= datas(item).Link %>"><%= datas(item).Title%></a>
+            </label>
+            <div class="search-one-content"><%= datas(item).Description%></div>
+          </div>
+        <% Next %>
+
+
+
+
         <div class="search-one">
           <label class="search-title">
             <div class="search-url">http://localhost/community.asp</div>
