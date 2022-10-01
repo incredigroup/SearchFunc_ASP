@@ -16,7 +16,11 @@
               <li class="uk-active"><a href="blog.asp" style="cursor:pointer;">Blog</a></li>
               <li class="uk-active"><a href="community.asp" style="cursor:pointer;">Community</a></li>
               <li class="uk-active">
-                <input type="text" id="search" name="keyword" class="search-box"/>
+                <div class="container">
+                  <input type="search" placeholder="Search" id="keyword" name="keyword" class="search-box search-field" />
+                  <button type="" class="search-button">
+                    <img src="images/search.png.asp">
+                  </button>
               </li>
             </ul>
           </div>

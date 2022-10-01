@@ -3,24 +3,11 @@
   <h1>Community Page</h1>
 
   <%
-    Dim fso, file, fileSpec, fileName
-    Dim countrySplit
-
-    fileName = Application("rootURL") & "/files/cities.txt"
-    fileSpec = Server.MapPath(fileName)
     
-    ' OpenTextFile has several mode 
-    ' 1 for reading file
-    ' 2 for writing file
-    ' 8 for append file content
-    ' see : https://msdn.microsoft.com/en-us/library/314cz14s.aspx
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    Set file = fso.OpenTextFile(filespec,8) 
-
-    Response.write "Append writing file " & fileName & "<br/><br/>"
-
-    file.WriteLine "This is my updated sentence."
-    file.WriteLine "written at " & Now
   %>
+
+  <p>After that, the goals and objectives should be determined. In short, the purpose of a website needs to be considered by all stakeholders. game This might sound obvious, but it is so often neglected. After you have answered all these questions, you can easily choose the format of the website.
+
+</p>
 <!--#include file="layouts/footer.asp"-->
 

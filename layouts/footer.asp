@@ -20,11 +20,25 @@
       hljs.initHighlightingOnLoad();
     </script>
     <script>
-      $("#search").keydown(function (e) {
+      $("#keyword").keydown(function (e) {
         if (e.keyCode == 13) {
-            window.location = "search.asp?keyword=" + $(this).val();
+            if($(this).val()) {
+              window.location = "search.asp?keyword=" + $(this).val() + "&page=1";
+            } else {
+              alert("Nothing to Search!");
+              return;
+            }
         }
-    });
+      });
+
+      $(".search-button").click(function (){
+        if($("#keyword").val()) {
+            window.location = "search.asp?keyword=" + $("#keyword").val() + "&page=1";
+        } else {
+          alert("Nothing to Search!");
+          return;
+        }
+      })
     </script>
   </body>
 </html>
