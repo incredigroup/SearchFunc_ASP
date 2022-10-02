@@ -5,11 +5,6 @@
       </footer>
       </div>
     </div>
-    <script language="VBScript">
-      sub search
-          response.redirect ("publipostage.asp")
-      end sub  
-    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 

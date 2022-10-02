@@ -2,7 +2,7 @@
 <!--#include file="./models/jsonobj.asp" -->
 
   <%
-    Dim keyword, page, curpage                                             'http parameters
+    Dim keyword, page, curpage, nextPage, prePage                         'http parameters
     keyword = Request.QueryString("keyword")
     curpage = Request.QueryString("page")
     session("page") = Request.QueryString("page")
@@ -16,12 +16,12 @@
     folderURL = Application("rootURL")
     Set datas = Server.CreateObject("Scripting.Dictionary")
     
-    perPage = 5                                                              ' number per page
+    perPage = 2                                                              ' number per page
     ignoreFile = array("header.asp", "README.md", "footer.asp", "search.asp", "global.asa", "connection.udl", "LICENSE")
     ignoreFolder = array("/css", "/docs/pdf", "/images", "/files", "/.git", "/models")
 
-		tableString = "{tableSetting: [{ ""table"" : ""community"", ""link"": ""community.asp"", ""columns"": [""summary"", ""title"", ""description""]}, "
-    tableString = tableString & "{ ""table"" : ""blog"", ""link"": ""blog.asp"", ""columns"": [""title"", ""description""]}] }"
+		tableString = "{tableSetting: [{ ""table"" : ""community"", ""haveparam"" : ""noparam"", ""title"" : ""title"", ""for"" : ""eventnews"", ""link"": ""community.asp"", ""columns"": [""summary"", ""title"", ""description""]}, "
+    tableString = tableString & "{ ""table"" : ""blog"", ""haveparam"" : ""isparam"", ""title"" : ""title"", ""for"" : ""for"",  ""link"": ""blog.asp"", ""columns"": [""title"", ""description""]}] }"
     
 
 ' /////////////////////////////////////////////                Get search query using union         ///////////////////////////////////
@@ -31,6 +31,9 @@
         Set this = oJSON.data("tableSetting").item(table)
         tablename = this.item("table")
         link = this.item("link")
+        title = this.item("title")
+        queryFor = this.item("for")
+        haveParam = this.item("haveparam")
         columns = ""
         concat = ""
         i = 1
@@ -38,15 +41,15 @@
           If i = this.item("columns").Count Then 
             columns = columns & this.item("columns").item(one) & " like '%" & keyword & "%'"
           Else 
-            columns = columns & this.item("columns").item(one) & " like '%" & keyword & "%' and "
+            columns = columns & this.item("columns").item(one) & " like '%" & keyword & "%' or "
           End If
           IF i = 1 Then concat = this.item("columns").item(one) Else concat = concat & "," & this.item("columns").item(one)  End If
           i = i + 1
         Next
         If j = 1 Then 
-          query = " select concat(" & concat & ") as description, '" & link & "' as link  from " & tablename & " where " & columns
+          query = " select concat(" & concat & ") as description, '" & link & "' as link, " & title & " as title, '" & queryfor & "' as qfor, '" & haveParam & "' as haveparam  from " & tablename & " where " & columns
         Else
-          query = query & " UNION " & " select concat(" & concat & ") as description, '" & link & "' as link  from " & tablename & " where " & columns
+          query = query & " UNION " & " select concat(" & concat & ") as description, '" & link & "' as link, " & title & " as title, '" & queryfor & "' as qfor, '" & haveParam & "' as haveparam  from " & tablename & " where " & columns
         End If
         j = j + 1
     Next
@@ -84,9 +87,22 @@
       fileContent = recordset.Fields("description")
       searchPosition = InStr(1,fileContent, keyword, 1)
       IF searchPosition <> 0 Then
-        getSearchContent fileContent, searchPosition, recordset.Fields("link")
-      End IF
-      recordset.MoveNext
+        cnt = cnt + 1
+        searchPosition = searchPosition - 200 
+        If searchPosition <= 0 Then searchPosition = 1 End If 
+        fileContent = regexObject.Replace(fileContent, "")
+        fileContent = Replace(fileContent, keyword, "<b>"&keyword&"</b>", 1, -1, 1)
+        seq = seq + 1
+        set data = New search
+        If recordset.Fields("haveparam") = "isparam" Then 
+          data.Link = recordset.Fields("link") & "?for=" & recordset.Fields("qfor") & "&title=" & recordset.Fields("title")
+        Else
+          data.Link = recordset.Fields("link")
+        End If
+        data.Description =  "..." & Mid(fileContent, searchPosition, 500) & "..."
+        datas.add seq, data
+        End IF
+        recordset.MoveNext
     Loop 
     connection.Close()
 
@@ -151,37 +167,23 @@
 ' //////////////////////////////////////////             Pagination Code                    //////////////////////////////
       
       sItem = 1
-      requestedPage = LCase(Request("page"))
+      page = LCase(Request("page"))
       MAX_PAGE = Ceil(datas.Count / perPage)
       If ( MAX_PAGE > 1 ) And ( CurrentPage() > 1 ) Then 
         sItem = (CurrentPage()-1) * perPage + 1
       End If
-      eItem = sItem + 4
+      eItem = sItem + perPage - 1
       If eItem > datas.Count Then eItem = datas.Count End If 
       
-      If requestedPage = "next" Then
-        page = NextPage()
-      ElseIf requestedPage = "prev" Then
-        page = PrevPage()
-      Else
-        page = SetPage(requestedPage)
-      End If
-
-
+      nextPage = curpage + 1
+      prePage = curpage - 1
+      
       Function CurrentPage
           If IsNumeric(Session("page")) Then
               CurrentPage = Session("page")
           Else
               CurrentPage = 1
           End If 
-      End Function
-
-      Function NextPage
-          NextPage = SetPage(CurrentPage() + 1)
-      End Function
-
-      Function PrevPage
-          PrevPage = SetPage(CurrentPage() - 1)
       End Function
 
       Function SetPage(newPage)
@@ -205,6 +207,7 @@
 <!--#include file="layouts/header.asp"-->
   <h1 class="uk-title">List of Results </h1>
   <% If MAX_PAGE <> 0 Then%>
+  <div class="number">Number Per Page: <%= perPage %></div>
   <div class="search-count">Your search for < <%= keyword %> > matched <%= cnt %> records</div>
   <br/>
     <div class="container">
@@ -217,17 +220,23 @@
           </div>
         <% Next %>
     </div>
-    <div class="pagination">
-      <a href="search.asp?page=prev&keyword=<%= keyword%>">Previous </a>
-      <% For i = 1 to MAX_PAGE Step 1 %>
-        <%If i = curpage * 1 Then %>
-          <a class="page-one" href="search.asp?page=<%= i%>&keyword=<%= keyword%>"><%= i%></a>
-        <%Else%>
-          <a class="page-one active" href="search.asp?page=<%= i%>&keyword=<%= keyword%>"><%= i%></a>
+    <%If MAX_PAGE > 1 Then %>
+      <div class="pagination">
+        <%If curpage <> 1 Then %>
+        <a href="search.asp?page=<%= prePage%>&keyword=<%= keyword%>">Previous </a>
         <%End If%>
-      <% Next %>
-      <a href="search.asp?page=next&keyword=<%= keyword%>">Next</a> 
-    </div>
+        <% For i = 1 to MAX_PAGE Step 1 %>
+          <%If i = curpage * 1 Then %>
+            <a class="page-one" href="search.asp?page=<%= i%>&keyword=<%= keyword%>"><%= i%></a>
+          <%Else%>
+            <a class="page-one active" href="search.asp?page=<%= i%>&keyword=<%= keyword%>"><%= i%></a>
+          <%End If%>
+        <% Next %>
+        <%If curpage * 1 <> MAX_PAGE Then %>
+        <a href="search.asp?page=<%= nextPage%>&keyword=<%= keyword%>">Next</a> 
+        <%End if%>
+      </div>
+    <%End If%>
   <%Else%>
     <div class="search-count">There is no Results</div>
   <% End If%>
