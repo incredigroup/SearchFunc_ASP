@@ -117,32 +117,40 @@
         If ignoreFile_obj.Exists(objFile.Name) = 0 Then
           Set fso = CreateObject("Scripting.FileSystemObject")
           Set file = fso.OpenTextFile(objFile.Path,1) 
-          ' Do While Not file.AtEndOfStream
             fileContent = file.ReadAll
-            searchPosition = InStr(1,fileContent, keyword, 1)
-            IF searchPosition <> 0 Then
-              getSearchContent fileContent, searchPosition, objFile.Name
+            searchStart = InStr(1, fileContent, "<main>", 1)
+            searchEnd = InStr(1, fileContent, "</main>", 1)
+            searchLength = searchEnd - searchStart
+            If (searchStart > 0) And (searchEnd > 0) And (searchLength > 0) Then
+              fileContent =  Mid(fileContent, searchStart, searchLength)
+              searchPosition = InStr(1,fileContent, keyword, 1)
+              IF searchPosition <> 0 Then
+                getSearchContent fileContent, searchPosition, objFile.Name
+              End If
             End IF
-          ' Loop
         End If
     Next
 
     ShowSubfolders objFolder
     Sub ShowSubFolders(Folder)
       If ignoreFolder_obj.Exists(Replace(Folder, "\", "")) = 0 then
-        ' Response.write "subfolder" & Folder & "<br/><br/>"
         For Each Subfolder in Folder.SubFolders
           Set mobjFolder = objFSO.getFolder(Subfolder.Path)
           Set ncolFiles = mobjFolder.Files
           For Each nobjFile in ncolFiles
               If ignoreFile_obj.Exists(nobjFile.Name) = 0 Then
                 Set fso = CreateObject("Scripting.FileSystemObject")
-                Set file = fso.OpenTextFile(nobjFile.Path,1) 
+                Set file = fso.OpenTextFile(nobjFile.Path,1)
                   fileContent = file.ReadAll
-                  searchPosition = InStr(1,fileContent, keyword, 1)
-                  IF searchPosition <> 0 Then
-                    getSearchContent fileContent, searchPosition, nobjFile.Name
-                    ' Response.write nobjFile.Name
+                  searchStart = InStr(1,fileContent, "<main>", 1)
+                  searchEnd = InStr(1,fileContent, "</main>", 1)
+                  searchLength = searchEnd - searchStart
+                  If (searchStart > 0) And (searchEnd > 0) And (searchLength > 0) Then
+                    fileContent =  Mid(fileContent, searchStart, searchLength)
+                    searchPosition = InStr(1,fileContent, keyword, 1)
+                    IF searchPosition <> 0 Then
+                      getSearchContent fileContent, searchPosition, nobjFile.Name
+                    End If
                   End IF
               End If
           Next
