@@ -68,11 +68,13 @@
 '////////////////////////////////  strip html tags and comments in files ///////////////////////// 
     Set regexObject = CreateObject("vbscript.regexp")
     With regexObject
-        .Pattern = "<!*[^<>]*>"
+        ' .Pattern = "<!*[^<>]*>"
+        .Pattern = "<!*[^<>]*>|<!*[^@@]*>" 
         .Global = True
         .IgnoreCase = True
         .MultiLine = True
     End With 
+
 
 
 ' /////////////////////////////   Search from Database       ////////////////////////////////////////////
@@ -123,6 +125,7 @@
             searchLength = searchEnd - searchStart
             If (searchStart > 0) And (searchEnd > 0) And (searchLength > 0) Then
               fileContent =  Mid(fileContent, searchStart, searchLength)
+              fileContent = regexObject.Replace(fileContent, "")
               searchPosition = InStr(1,fileContent, keyword, 1)
               IF searchPosition <> 0 Then
                 getSearchContent fileContent, searchPosition, objFile.Name
@@ -147,6 +150,7 @@
                   searchLength = searchEnd - searchStart
                   If (searchStart > 0) And (searchEnd > 0) And (searchLength > 0) Then
                     fileContent =  Mid(fileContent, searchStart, searchLength)
+                    fileContent = regexObject.Replace(fileContent, "")
                     searchPosition = InStr(1,fileContent, keyword, 1)
                     IF searchPosition <> 0 Then
                       getSearchContent fileContent, searchPosition, nobjFile.Name
@@ -163,12 +167,12 @@
       cnt = cnt + 1
       searchPosition = searchPosition - 200 
       If searchPosition <= 0 Then searchPosition = 1 End If 
-      fileContent = regexObject.Replace(fileContent, "")
       fileContent = Replace(fileContent, keyword, "<b>"&keyword&"</b>", 1, -1, 1)
       seq = seq + 1
       set data = New search
       data.Link = link
       data.Description =  "..." & Mid(fileContent, searchPosition, 500) & "..."
+      ' data.Description =  fileContent
       datas.add seq, data
     End Sub
 
